@@ -1,5 +1,8 @@
 package com.example.guest.weatherapp;
 
+import android.util.Log;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,6 +20,9 @@ import okhttp3.Response;
  * Created by Guest on 7/5/16.
  */
 public class WeatherService {
+
+    public static final String TAG = WeatherActivity.class.getSimpleName();
+
 
     public static void getWeather (String location, Callback callback){
         String API_KEY = Constants.WEATHER_API_KEY;
@@ -43,14 +49,19 @@ public class WeatherService {
 
         try {
             String jsonData = response.body().string();
+
             if (response.isSuccessful()) {
-                JSONObject weatherJSON = new JSONObject(jsonData);
+                JSONArray weatherJSON = new JSONObject(jsonData).getJSONArray("list");
 
-                String description = weatherJSON.getString("description");
+                for (int i = 0; i < weatherJSON.length(); i++) {
+                    String desc = weatherJSON.getJSONObject(i).getJSONArray("weather").getJSONObject(0).getString("description");
 
-                Forecast forecast = new Forecast(description);
-                forecasts.add(forecast);
+                    Forecast forecast = new Forecast(desc);
+                    forecasts.add(forecast);
+                }
+//                Log.v(TAG, String.valueOf(forecasts));
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSONException e) {
